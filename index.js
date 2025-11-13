@@ -6,9 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Якщо приходить будь-який інший запит (наприклад, /route), повертаємо index.html
-// ✅ Правильна версія для Express 5:
-app.get('/*', (req, res) => {
+// Catch-all: працює на express 5.x
+app.get('/:any*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
