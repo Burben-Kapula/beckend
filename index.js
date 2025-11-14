@@ -1,11 +1,9 @@
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
 const morgan = require('morgan');
-app.use(morgan('tiny'));
 
-app.use(express.json()) // додай для парсингу JSON
-morgan.token('body', (req) => JSON.stringify(req.body));
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
+app.use(morgan('tiny'));
+app.use(express.json()); // Для парсингу JSON
 
 let persons = [
   {
@@ -31,52 +29,37 @@ let persons = [
 ]
 
 
-// GET по id (правильно)
-app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person => person.id === id)
+// GET по id
+app.get('/api/persons/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const person = persons.find(person => person.id === id);
   if (person) {
-    response.json(person)
+    res.json(person);
   } else {
-    response.status(404).end()
+    res.status(404).end();
   }
-})
-
-
-// DELETE (правильно)
-app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id) // перевести у число!
-  persons = persons.filter(person => person.id !== id)
-  response.status(204).end()
-})
-
-// POST (правильно)
-app.post('/api/persons', (request, response) => {
-  const body = request.body;
-
-  // Перевірка, чи є імʼя та номер
-  if (!body.name || !body.number) {
-    return response.status(400).json({ error: 'name or number missing' });
-  }
-
-  // Генерація випадкового унікального id
-  const generateId = () => {
-    // Великий діапазон для унікальності
-    return Math.floor(Math.random() * 10000000);
-  };
-
-  const person = {
-    id: generateId(),
-    name: body.name,
-    number: body.number
-  };
-
-  persons = persons.concat(person);
-
-  response.status(201).json(person); // Повертає створений обʼєкт
 });
 
-const PORT = 3001
+// DELETE
+app.delete('/api/persons/:id', (req, res) => {
+  const id = Number(req.params.id);
+  persons = persons.filter(person => person.id !== id);
+  res.status(204).end();
+});
+
+// POST
+app.post('/api/persons', (req, res) => {
+  const body = req.body;
+  if (!body.name || !body.number) {
+    return res.status(400).json({ error: 'name or number missing' });
+  }
+  const generateId = () => Math.floor(Math.random() * 10000000);
+  const person = { id: generateId(), name: body.name, number: body.number };
+  persons = persons.concat(person);
+  res.status(201).json(person);
+});
+
+const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  console.log(`Server running on port ${PORT}`);
+});
