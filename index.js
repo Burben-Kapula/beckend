@@ -71,6 +71,10 @@ app.post('/api/persons', (req, res) => {
     });
 });
 
+app.get('/', (req, res) => {
+  res.send('API working!'); // або будь-яке повідомлення
+});
+
 
 const PORT = 3001;
 app.listen(PORT, () => {
