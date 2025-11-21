@@ -53,6 +53,7 @@ app.delete('/api/persons/:id', (req, res) => {
     .catch(error => {
       res.status(400).json({ error: 'malformatted id' });
     });
+      console.log('DELETE:', req.params.id);
 });
 
 // POST (add new person)
