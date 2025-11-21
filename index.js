@@ -6,13 +6,12 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB_URI, { family: 4 });
 
-const Person = require('./models/person');
+const Person = require('./models/person'); // <-- Тепер модель Person
 
 app.use(morgan('tiny'));
 app.use(express.json());
 
-
-// GET ALL
+// GET ALL persons
 app.get('/api/persons', (req, res) => {
   Person.find({})
     .then(persons => {
@@ -23,8 +22,7 @@ app.get('/api/persons', (req, res) => {
     });
 });
 
-
-// GET by id
+// GET person by id
 app.get('/api/persons/:id', (req, res) => {
   Person.findById(req.params.id)
     .then(person => {
@@ -39,8 +37,7 @@ app.get('/api/persons/:id', (req, res) => {
     });
 });
 
-
-// DELETE by id
+// DELETE person by id
 app.delete('/api/persons/:id', (req, res) => {
   Person.findByIdAndDelete(req.params.id)
     .then(() => {
@@ -51,8 +48,7 @@ app.delete('/api/persons/:id', (req, res) => {
     });
 });
 
-
-// POST (add new)
+// POST (add new person)
 app.post('/api/persons', (req, res) => {
   const body = req.body;
   if (!body.name || !body.number) {
@@ -72,9 +68,8 @@ app.post('/api/persons', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('API working!'); // або будь-яке повідомлення
+  res.send('Phonebook API working!');
 });
-
 
 const PORT = 3001;
 app.listen(PORT, () => {
