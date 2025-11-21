@@ -33,6 +33,3 @@ person.save()
     console.log('Error saving:', error);
     mongoose.connection.close();
   });
-
-
-  
