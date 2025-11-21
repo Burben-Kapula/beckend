@@ -38,13 +38,14 @@ person.save()
   const mongoose = require('mongoose');
 
 const noteSchema = new mongoose.Schema({
-  content: {
+  name: {
     type: String,
-    minlength: 5,
+    minlength: 3,
     required: true
   },
-  important: Boolean
+  number: String,
 });
+
 
 const Note = mongoose.model('Note', noteSchema);
 
