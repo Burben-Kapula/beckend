@@ -33,3 +33,19 @@ person.save()
     console.log('Error saving:', error);
     mongoose.connection.close();
   });
+
+
+  const mongoose = require('mongoose');
+
+const noteSchema = new mongoose.Schema({
+  content: {
+    type: String,
+    minlength: 5,
+    required: true
+  },
+  important: Boolean
+});
+
+const Note = mongoose.model('Note', noteSchema);
+
+module.exports = Note;

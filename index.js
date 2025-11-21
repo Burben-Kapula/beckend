@@ -73,15 +73,7 @@ app.post('/api/persons', (req, res) => {
       res.status(500).json({ error: 'server error' });
     });
 });
-const noteSchema = new mongoose.Schema({
 
-  content: {
-    type: String,
-    minlength: 3,
-    required: true
-  },
-  important: Boolean
-})
 app.get('/', (req, res) => {
   res.send('Phonebook API working!');
 });
