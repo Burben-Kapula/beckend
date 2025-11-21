@@ -1,11 +1,12 @@
 
 
-const cors = require('cors');
-app.use(cors());
 
 
 const express = require('express');
 const app = express();
+const cors = require('cors');
+app.use(cors());
+
 const morgan = require('morgan');
 require('dotenv').config();
 
