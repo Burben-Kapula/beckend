@@ -17,7 +17,7 @@ const Person = require('./models/person'); // <-- Тепер модель Person
 
 app.use(morgan('tiny'));
 app.use(express.json());
-app.use(express.static('build'));
+app.use(express.static('dist'));
 
 // GET ALL persons
 app.get('/api/persons', (req, res) => {
@@ -75,9 +75,9 @@ app.post('/api/persons', (req, res) => {
     });
 });
 
-app.get('/', (req, res) => {
-  res.send('Phonebook API working!');
-});
+// app.get('/', (req, res) => {
+//   res.send('Phonebook API working!');
+// });
 
 const PORT = 3001;
 app.listen(PORT, () => {
