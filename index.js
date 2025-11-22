@@ -77,6 +77,7 @@ app.post('/api/persons', (req, res) => {
 app.get('/', (req, res) => {
   res.send('Phonebook API working!');
 });
+app.use(express.static('build'));
 
 const PORT = 3001;
 app.listen(PORT, () => {
