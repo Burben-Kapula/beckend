@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "NODE_ENV=test node --test",
-    "build": "some-build-command"
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",
