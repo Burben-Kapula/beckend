@@ -1,20 +1,16 @@
 const mongoose = require('mongoose')
 
-const noteSchema = new mongoose.Schema({
-  content: {
-    type: String,
-    required: true,
-    minlength: 5
-  },
-  important: Boolean,
+const personSchema = new mongoose.Schema({
+  content: { type: String, required: true, minlength: 5 },
+  important: Boolean
 })
 
-noteSchema.set('toJSON', {
-  transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
+personSchema.set('toJSON', {
+  transform: (doc, obj) => {
+    obj.id = obj._id.toString()
+    delete obj._id
+    delete obj.__v
   }
 })
 
-module.exports = mongoose.model('Person', noteSchema) // експортуй як Person
+module.exports = mongoose.model('Person', personSchema)

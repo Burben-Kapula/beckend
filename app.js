@@ -24,6 +24,7 @@ app.use(express.static('dist'))
 app.use(express.json())
 app.use(middleware.requestLogger)
 
+app.use('/api/persons', personsRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
