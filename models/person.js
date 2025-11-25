@@ -1,16 +1,8 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const personSchema = new mongoose.Schema({
-  name: { type: String, required: true, minlength: 3 },
-  number: { type: String, required: true, minlength: 8 }
-})
+  name: { type: String, required: true, minlength: 2 },
+  number: { type: String, required: true }
+});
 
-personSchema.set('toJSON', {
-  transform: (doc, obj) => {
-    obj.id = obj._id.toString()
-    delete obj._id
-    delete obj.__v
-  }
-})
-
-module.exports = mongoose.model('Person', personSchema)
+module.exports = mongoose.model('Person', personSchema);
