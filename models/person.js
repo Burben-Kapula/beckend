@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 
 const personSchema = new mongoose.Schema({
-  content: { type: String, required: true, minlength: 5 },
-  important: Boolean
+  name: { type: String, required: true, minlength: 3 },
+  number: { type: String, required: true, minlength: 3 }
 })
 
 personSchema.set('toJSON', {
