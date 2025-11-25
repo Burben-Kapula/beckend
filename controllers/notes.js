@@ -1,17 +1,19 @@
-const notesRouter = require('express').Router()
-const Note = require('../models/person')
+const personsRouter = require('express').Router()
+const Person = require('../models/person')
 
-notesRouter.get('/', (request, response) => {
-  Note.find({}).then(notes => {
-    response.json(notes)
+// GET /api/persons
+personsRouter.get('/', (request, response) => {
+  Person.find({}).then(persons => {
+    response.json(persons)
   })
 })
 
-notesRouter.get('/:id', (request, response, next) => {
-  Note.findById(request.params.id)
-    .then(note => {
-      if (note) {
-        response.json(note)
+// GET /api/persons/:id
+personsRouter.get('/:id', (request, response, next) => {
+  Person.findById(request.params.id)
+    .then(person => {
+      if (person) {
+        response.json(person)
       } else {
         response.status(404).end()
       }
@@ -19,47 +21,49 @@ notesRouter.get('/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-notesRouter.post('/', (request, response, next) => {
+// POST /api/persons
+personsRouter.post('/', (request, response, next) => {
   const body = request.body
 
-  const note = new Note({
+  const person = new Person({
     content: body.content,
     important: body.important || false,
   })
 
-  note.save()
-    .then(savedNote => {
-      response.status(201).json(savedNote)    // ← Додавай статус 201 тут!
+  person.save()
+    .then(savedPerson => {
+      response.status(201).json(savedPerson)
     })
     .catch(error => next(error))
 })
 
-
-notesRouter.delete('/:id', (request, response, next) => {
-  Note.findByIdAndDelete(request.params.id)
+// DELETE /api/persons/:id
+personsRouter.delete('/:id', (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
     .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
 })
 
-notesRouter.put('/:id', (request, response, next) => {
+// PUT /api/persons/:id
+personsRouter.put('/:id', (request, response, next) => {
   const { content, important } = request.body
 
-  Note.findById(request.params.id)
-    .then(note => {
-      if (!note) {
+  Person.findById(request.params.id)
+    .then(person => {
+      if (!person) {
         return response.status(404).end()
       }
 
-      note.content = content
-      note.important = important
+      person.content = content
+      person.important = important
 
-      return note.save().then((updatedNote) => {
-        response.json(updatedNote)
+      return person.save().then((updatedPerson) => {
+        response.json(updatedPerson)
       })
     })
     .catch(error => next(error))
 })
 
-module.exports = notesRouter
+module.exports = personsRouter
