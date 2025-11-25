@@ -29,10 +29,11 @@ notesRouter.post('/', (request, response, next) => {
 
   note.save()
     .then(savedNote => {
-      response.json(savedNote)
+      response.status(201).json(savedNote)    // ← Додавай статус 201 тут!
     })
     .catch(error => next(error))
 })
+
 
 notesRouter.delete('/:id', (request, response, next) => {
   Note.findByIdAndDelete(request.params.id)
