@@ -28,5 +28,8 @@ app.use('/api/persons', personsRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
+app.use((req, res) => {
+  res.status(404).json({ error: 'unknown endpoint', url: req.url });
+});
 
 module.exports = app
