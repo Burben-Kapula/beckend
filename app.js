@@ -6,29 +6,21 @@ const middleware = require('./utils/middleware')
 const personsRouter = require('./controllers/persons')
 const cors = require('cors');
 const app = express()
+
 app.use(cors());
-// Логи підключення до БД
-logger.info('connecting to', config.MONGODB_URI)
-
-mongoose
-  .connect(config.MONGODB_URI, { family: 4 })
-  .then(() => {
-    logger.info('connected to MongoDB')
-  })
-  .catch((error) => {
-    logger.error('error connecting to MongoDB:', error.message)
-  })
-
-// Першим — парсинг json
 app.use(express.json())
-// Далі — логгер запитів
 app.use(middleware.requestLogger)
-// Далі — фронтенд, якщо деплоїш обидві частини на один сервер
 app.use(express.static('dist'))
-// API роути для контактів
 app.use('/api/persons', personsRouter)
+
+// Додаємо маршрут для кореня!
+app.get('/', (req, res) => {
+  res.send('Backend Phonebook API is running');
+});
+
 // Обробник для неіснуючих endpoint (404)
-app.use(middleware.unknownEndpoint)
+app.use(middleware.unknownEndpoint);
+
 // Централізований обробник помилок
 app.use(middleware.errorHandler)
 
