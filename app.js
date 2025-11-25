@@ -4,11 +4,10 @@ const config = require('./utils/config')
 const logger = require('./utils/logger')
 const middleware = require('./utils/middleware')
 const personsRouter = require('./controllers/persons')
+
 const app = express()
 
-app.use('/api/persons', personsRouter)
-
-
+// Логи підключення до БД
 logger.info('connecting to', config.MONGODB_URI)
 
 mongoose
@@ -17,15 +16,20 @@ mongoose
     logger.info('connected to MongoDB')
   })
   .catch((error) => {
-    logger.error('error connection to MongoDB:', error.message)
+    logger.error('error connecting to MongoDB:', error.message)
   })
 
-app.use(express.static('dist'));
-app.use(express.json());
-app.use(middleware.requestLogger);
-app.use('/api/persons', personsRouter);
+// Першим — парсинг json
+app.use(express.json())
+// Далі — логгер запитів
+app.use(middleware.requestLogger)
+// Далі — фронтенд, якщо деплоїш обидві частини на один сервер
+app.use(express.static('dist'))
+// API роути для контактів
+app.use('/api/persons', personsRouter)
+// Обробник для неіснуючих endpoint (404)
+app.use(middleware.unknownEndpoint)
+// Централізований обробник помилок
+app.use(middleware.errorHandler)
 
-app.use(middleware.unknownEndpoint); // лише ОДИН!
-app.use(middleware.errorHandler);
-
-module.exports = app;
+module.exports = app
