@@ -4,10 +4,10 @@ const config = require('./utils/config')
 const logger = require('./utils/logger')
 const middleware = require('./utils/middleware')
 const personsRouter = require('./controllers/persons')
+const app = express()
 
 app.use('/api/persons', personsRouter)
 
-const app = express()
 
 logger.info('connecting to', config.MONGODB_URI)
 
