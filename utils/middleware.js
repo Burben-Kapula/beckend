@@ -1,31 +1,27 @@
-const logger = require('./logger')
+// app.js
 
-const requestLogger = (request, response, next) => {
-  logger.info('Method:', request.method)
-  logger.info('Path:  ', request.path)
-  logger.info('Body:  ', request.body)
-  logger.info('---')
-  next()
-}
+// Middleware для перевірки ім'я та номеру
+function validatePerson(req, res, next) {
+  const { name, number } = req.body;
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
-
-const errorHandler = (error, request, response, next) => {
-  logger.error(error.message)
-
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message })
+  // Перевірка імені: мінімум 3 букви
+  if (!name || typeof name !== 'string' || name.length < 3) {
+    return res.status(400).json({ error: 'Name must be at least 3 characters long' });
   }
 
-  next(error)
+  // Перевірка номеру: формат 000-00000000
+  const numberPattern = /^\d{3}-\d{8}$/;
+  if (!numberPattern.test(number)) {
+    return res.status(400).json({ error: 'Number must match format 000-00000000' });
+  }
+
+  next();
 }
 
-module.exports = {
-  requestLogger,
-  unknownEndpoint,
-  errorHandler
-}
+// Додаємо middleware до маршруту POST
+app.post('/api/persons', validatePerson, async (req, res) => {
+  const { name, number } = req.body;
+  const person = new Person({ name, number });
+  const savedPerson = await person.save();
+  res.status(201).json(savedPerson);
+});
