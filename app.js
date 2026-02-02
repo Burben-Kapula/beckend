@@ -188,6 +188,243 @@ app.delete('/api/persons/:id', async (req, res) => {
     res.status(500).json({ error: 'Delete failed' });
   }
 });
+// app.js - ДОДАЙ після маршрутів Person
+
+const Blog = require('./models/blog');
+
+// **НОВИЙ**: GET всі блоги
+app.get('/api/blogs', async (req, res) => {
+  try {
+    // populate заповнює дані автора і користувачів в лайках/коментах
+    const blogs = await Blog.find({})
+      .populate('author', 'name email')  // Додає дані автора
+      .populate('comments.user', 'name');  // Додає імена користувачів в коментах
+    
+    res.json(blogs);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch blogs' });
+  }
+});
+
+// **НОВИЙ**: POST створити блог
+app.post('/api/blogs', async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    
+    // Отримуємо ID користувача з body (в production використовуй JWT token!)
+    const userId = req.body.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    
+    if (!title || title.length < 3) {
+      return res.status(400).json({ error: 'Title must be at least 3 characters' });
+    }
+    
+    if (!content) {
+      return res.status(400).json({ error: 'Content is required' });
+    }
+    
+    const blog = new Blog({
+      title,
+      content,
+      author: userId,
+      likes: [],
+      dislikes: [],
+      comments: []
+    });
+    
+    const savedBlog = await blog.save();
+    const populatedBlog = await Blog.findById(savedBlog._id).populate('author', 'name email');
+    
+    res.status(201).json(populatedBlog);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// **НОВИЙ**: PUT додати лайк
+app.put('/api/blogs/:id/like', async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    
+    const blog = await Blog.findById(req.params.id);
+    
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+    
+    // Видаляємо дізлайк якщо був
+    blog.dislikes = blog.dislikes.filter(id => id.toString() !== userId);
+    
+    // Перевіряємо чи вже є лайк від цього користувача
+    if (blog.likes.includes(userId)) {
+      // Якщо є - видаляємо (unlike)
+      blog.likes = blog.likes.filter(id => id.toString() !== userId);
+    } else {
+      // Якщо немає - додаємо
+      blog.likes.push(userId);
+    }
+    
+    await blog.save();
+    const updatedBlog = await Blog.findById(blog._id)
+      .populate('author', 'name email')
+      .populate('comments.user', 'name');
+    
+    res.json(updatedBlog);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// **НОВИЙ**: PUT додати дізлайк
+app.put('/api/blogs/:id/dislike', async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    
+    const blog = await Blog.findById(req.params.id);
+    
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+    
+    // Видаляємо лайк якщо був
+    blog.likes = blog.likes.filter(id => id.toString() !== userId);
+    
+    // Перевіряємо чи вже є дізлайк
+    if (blog.dislikes.includes(userId)) {
+      // Якщо є - видаляємо (undislike)
+      blog.dislikes = blog.dislikes.filter(id => id.toString() !== userId);
+    } else {
+      // Якщо немає - додаємо
+      blog.dislikes.push(userId);
+    }
+    
+    await blog.save();
+    const updatedBlog = await Blog.findById(blog._id)
+      .populate('author', 'name email')
+      .populate('comments.user', 'name');
+    
+    res.json(updatedBlog);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// **НОВИЙ**: POST додати коментар
+app.post('/api/blogs/:id/comments', async (req, res) => {
+  try {
+    const { userId, text } = req.body;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({ error: 'Comment text is required' });
+    }
+    
+    const blog = await Blog.findById(req.params.id);
+    
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+    
+    // Додаємо коментар в масив
+    blog.comments.push({
+      user: userId,
+      text: text.trim(),
+      createdAt: new Date()
+    });
+    
+    await blog.save();
+    const updatedBlog = await Blog.findById(blog._id)
+      .populate('author', 'name email')
+      .populate('comments.user', 'name');
+    
+    res.status(201).json(updatedBlog);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// **НОВИЙ**: DELETE видалити коментар
+app.delete('/api/blogs/:blogId/comments/:commentId', async (req, res) => {
+  try {
+    const { blogId, commentId } = req.params;
+    const userId = req.body.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    
+    const blog = await Blog.findById(blogId);
+    
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+    
+    // Знаходимо коментар
+    const comment = blog.comments.id(commentId);
+    
+    if (!comment) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+    
+    // Перевіряємо чи користувач автор коментаря
+    if (comment.user.toString() !== userId) {
+      return res.status(403).json({ error: 'You can only delete your own comments' });
+    }
+    
+    // Видаляємо коментар
+    comment.remove();
+    await blog.save();
+    
+    const updatedBlog = await Blog.findById(blog._id)
+      .populate('author', 'name email')
+      .populate('comments.user', 'name');
+    
+    res.json(updatedBlog);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// **НОВИЙ**: DELETE видалити блог
+app.delete('/api/blogs/:id', async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    
+    const blog = await Blog.findById(req.params.id);
+    
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+    
+    // Перевіряємо чи користувач автор блогу
+    if (blog.author.toString() !== userId) {
+      return res.status(403).json({ error: 'You can only delete your own blogs' });
+    }
+    
+    await Blog.findByIdAndDelete(req.params.id);
+    res.status(204).end();
+  } catch (error) {
+    res.status(500).json({ error: 'Delete failed' });
+  }
+});
 
 // Middleware для обробки неіснуючих маршрутів (404)
 // Виконується якщо жоден з попередніх маршрутів не спрацював
