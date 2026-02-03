@@ -235,9 +235,11 @@ app.post('/api/blogs', async (req, res) => {
       comments: []
     });
     
+    // **ЦЕ ГОЛОВНЕ** - зберігаємо в MongoDB
     const savedBlog = await blog.save();
-    const populatedBlog = await Blog.findById(savedBlog._id).populate('author', 'name email');
     
+    // Повертаємо збережений блог з даними автора
+    const populatedBlog = await Blog.findById(savedBlog._id).populate('author', 'name email');
     res.status(201).json(populatedBlog);
   } catch (error) {
     res.status(400).json({ error: error.message });
