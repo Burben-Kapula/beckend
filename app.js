@@ -162,6 +162,38 @@ app.delete('/api/blogs/:blogId/comments/:commentId', async (req, res) => {
   await blog.save();
   res.json(await blog.populate(['author', 'comments.user']));
 });
+// Видалення блогу
+app.delete('/api/blogs/:id', async (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) return res.status(401).json({ error: 'User not authenticated' });
+
+  const blog = await Blog.findById(req.params.id);
+  if (!blog) return res.status(404).json({ error: 'Blog not found' });
+
+  if (blog.author.toString() !== userId) {
+    return res.status(403).json({ error: 'Only the author can delete this blog' });
+  }
+
+  await Blog.findByIdAndDelete(req.params.id);
+  res.status(204).end();
+});
+// Дізлайк
+app.put('/api/blogs/:id/dislike', async (req, res) => {
+  const { userId } = req.body;
+  const blog = await Blog.findById(req.params.id);
+  if (!blog) return res.status(404).json({ error: 'Blog not found' });
+
+  blog.likes = blog.likes.filter(id => id.toString() !== userId);
+  if (blog.dislikes.includes(userId)) {
+    blog.dislikes = blog.dislikes.filter(id => id.toString() !== userId);
+  } else {
+    blog.dislikes.push(userId);
+  }
+
+  await blog.save();
+  res.json(await blog.populate(['author', 'comments.user']));
+});
 
 // Обробка 404
 app.use((req, res) => {
