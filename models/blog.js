@@ -1,5 +1,7 @@
 // models/blog.js
 const mongoose = require('mongoose');
+const blogsRouter = require('express').Router()
+const Blog = require('../models/blog')
 
 const blogSchema = new mongoose.Schema({
   title: { 

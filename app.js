@@ -172,7 +172,7 @@ app.delete('/api/blogs/:id', async (req, res) => {
   if (!blog) return res.status(404).json({ error: 'Blog not found' });
 
   if (blog.author.toString() !== userId) {
-    return res.status(403).json({ error: 'Only the author can delete this blog' });
+    return res.staйtus(403).json({ error: 'Only the author can delete this blog' });
   }
 
   await Blog.findByIdAndDelete(req.params.id);
@@ -194,6 +194,35 @@ app.put('/api/blogs/:id/dislike', async (req, res) => {
   await blog.save();
   res.json(await blog.populate(['author', 'comments.user']));
 });
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await Person
+      .find({})
+      .sort({ name: 1 }); // Сортуємо за полем name (від А до Я)
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+blogsRouter.get('/:id', async (req, res) => {
+  try {
+    const blog = await Blog
+      .findById(req.params.id)
+      .populate('author', { name: 1 })    // якщо використовуєш populate
+      .populate('comments.user', { name: 1 })
+
+    if (!blog) {
+      return res.status(404).json({ error: 'blog not found' })
+    }
+
+    res.json(blog)
+  } catch (error) {
+    console.error('Error fetching blog by id:', error)
+    res.status(500).json({ error: 'Failed to fetch blog' })
+  }
+})
+app.use('/api/blogs', blogsRouter)
 
 // Обробка 404
 app.use((req, res) => {
