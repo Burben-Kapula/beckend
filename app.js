@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 require('dotenv').config();
+const blogsRouter = require('./controllers/persons') // шлях підправ, як у тебе
 
 // Моделі
 const Person = require('./models/person');
